@@ -7,13 +7,16 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
 import 'primeicons/primeicons.css'
 
+
 const app = createApp(App)
 
-app.use(router).use(PrimeVue, {
+app.use(router)
+.use(PrimeVue, {
     theme: {
         preset: Aura,
         options: {
             darkModeSelector: 'system',
         }
     }
-}).mount('#app')
+})
+.mount('#app')

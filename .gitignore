@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Libraries
+src/assets/plotly-3.4.0.min.js
