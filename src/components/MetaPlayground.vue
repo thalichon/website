@@ -51,13 +51,14 @@ export default defineComponent({
 
 <style scoped>
 .page-container {
-  margin: 2em;
+  margin: 2em 0em 2em 0;
   padding: 1em;
   background-color: white;
   border-radius: 10px;
 }
 
 h1 {
+  margin:0;
   color: #42b983;
 }
 </style>
