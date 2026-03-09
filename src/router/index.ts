@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../components/Home.vue'
-import Bio from '../components/Bio.vue'
+import MetaPlayground from '../components/MetaPlayground.vue'
 
 const routes = [
   {
@@ -9,9 +9,9 @@ const routes = [
     component: Home
   },
 {
-    path: '/bio',
-    name: 'Bio',
-    component: Bio
+    path: '/meta-playground',
+    name: 'MetaPlayground',
+    component: MetaPlayground
   },
   // Ajoutez d'autres routes ici
 ]

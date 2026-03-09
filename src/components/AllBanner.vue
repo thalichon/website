@@ -1,12 +1,8 @@
 <template>
     <Menubar :model="items" class="navbar">
-        <template #start>
-            <router-link to="/">
-                <div id="logo-container" class="undraggable">
-                    <img src="/logo.svg" id="logo" alt="home" >
-                </div>
-            </router-link>
-        </template>
+        <!-- <template #start>
+
+        </template> -->
         <template #item="{ item, props, hasSubmenu }">
             <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
                 <a v-ripple class="undraggable" :href="href" v-bind="props.action" @click="navigate">
@@ -41,9 +37,15 @@ export default {
                     route: '/'
                 },
                 {
-                    label: 'Bio',
-                    icon: 'pi pi-user',
-                    route: '/bio'
+                    label: "Projects",
+                    icon: 'pi pi-briefcase',
+                    items: [
+                        {
+                            label: 'Meta Playground',
+                            icon: 'pi pi-bullseye',
+                            route: '/meta-playground'
+                        },
+                    ]
                 }
             ] as MenuItem[]
         }
@@ -59,7 +61,7 @@ h1 {
     color: #42b983;
 }
 #logo {
-    height:80px;
+    height:50px;
     width: auto;
 }
 .nav-item{

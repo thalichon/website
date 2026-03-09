@@ -1,13 +1,15 @@
 <template>
   <div class="page-container">
-    <h1>Home</h1>
-    <p>Bienvenue sur la page d'accueil</p>
+    <h1>Meta Playground</h1>
+    <p>Explore various approaches to meta-learning and optimization algorithms!</p>
+    
+  
   </div>
 </template>
 
 <script lang="ts">
 export default {
-  name: 'Home',
+  name: 'MetaPlayground',
 };
 </script>
 
