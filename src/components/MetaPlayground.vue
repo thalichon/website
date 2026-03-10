@@ -7,26 +7,15 @@
     
     <div class="content-grid">
       <div class="graph-container">
-        <div id="tester"></div>
+        <div id="tester" ref="testerRef"></div>
       </div>
       
       <div class="controls-container">
         <h2>Controls</h2>
         <div class="control-group">
-          <label>Learning Rate</label>
-          <input type="range" min="0" max="1" step="0.01" value="0.1" />
-          <span class="value-display">0.1</span>
-        </div>
-        <div class="control-group">
-          <label>Iterations</label>
-          <input type="number" min="1" max="10000" value="100" />
-        </div>
-        <div class="control-group">
-          <label>Algorithm</label>
-          <select>
-            <option>Gradient Descent</option>
-            <option>Adam</option>
-            <option>RMSprop</option>
+          <label>Function to optimise</label>
+          <select id="function-select" aria-label="Select function" @change="changeFunction($event)">
+            <option v-for="x in funcs" :funcname="x" >{{ x }}</option>
           </select>
         </div>
         <button class="run-button">Run Optimization</button>
@@ -37,38 +26,151 @@
 
 
 <script lang="js">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, reactive } from 'vue';
 import Plotly from 'plotly.js-dist';
+import functions from '../assets/functions.js';
 
 export default defineComponent({
   name: 'MetaPlayground',
   setup() {
+    // Template ref for the plot container
+    const testerRef = ref(null);
 
-    onMounted(() => {
-      const TESTER = document.getElementById('tester');
-      var data = [{
-        z: [[10, 10.625, 12.5, 15.625, 20],
-            [5.625, 6.25, 8.125, 11.25, 15.625],
-            [2.5, 3.125, 5., 8.125, 12.5],
-            [0.625, 100.25, 3.125, 6.25, 10.625],
-            [0, 0.625, 2.5, 5.625, 10]],
-        x: [-9, -6, -5 , -3, -1],
-        y: [0, 1, 4, 5, 7],
-        type: 'contour',
-        line:{
-          smoothing: 0.85
-        },
-      }];
+    // Reactive plot state
+    const plotData = ref([]);
+    const currentFunction = ref('rastrigin');
 
-      var layout = {
-        title: {
-          text: 'Optimisation space'
-        }
-      };
-
-      Plotly.newPlot(TESTER, data, layout, { responsive: true });
+    // Default layout for the plot
+    const layout = reactive({
+      title: {
+        text: 'Optimisation space'
+      },
+      showlegend: false,
+      xaxis: {
+        title: { text: 'Dimension 1' },
+        autorange: true,
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false,
+        ticks: ''
+      },
+      yaxis: {
+        title: { text: 'Dimension 2' },
+        autorange: true,
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false,
+        ticks: ''
+      }
     });
 
+    // Default config for the plot
+    const config = {
+      staticPlot: false,
+      displayModeBar: false,
+      responsive: true
+    };
+
+    // Add default options for the contour plot
+    const addContourPlotOptions = (obj) => {
+      obj.type = 'contour';
+      obj.showscale = false;
+      obj.logscale = false;
+      obj.line = { smoothing: 0.85 };
+      return obj;
+    };
+
+    // Generates contour data needed by plotly contour plot
+    const generateContourData = (func, xDomain, yDomain, logscale, res = 100) => {
+      const obj = {
+        x: [],
+        y: [],
+        z: []
+      };
+      const xStep = (xDomain[1] - xDomain[0]) / res;
+      const yStep = (yDomain[1] - yDomain[0]) / res;
+      
+      for (let j = yDomain[0]; j < yDomain[1]; j += xStep) {
+        const row = [];
+        obj.y.unshift(j);
+        for (let i = xDomain[0]; i < xDomain[1]; i += yStep) {
+          let z = func(i, j);
+          if(logscale) {
+            z = Math.log10(z + 1e-15); // Add small value to avoid log(0)
+          }
+          row.push(z);
+        }
+        obj.z.unshift(row);
+      }
+      for (let i = xDomain[0]; i < xDomain[1]; i += yStep) {
+        obj.x.push(i);
+      }
+      return obj;
+    };
+
+    // Initialize the plot with default data
+    const initializePlot = () => {
+      const funcData = functions[currentFunction.value];
+      
+      // Create contour plot data
+      plotData.value[0] = generateContourData(
+        funcData.f,
+        funcData.xDomain,
+        funcData.yDomain,
+        funcData.logscale
+      );
+      plotData.value[0] = addContourPlotOptions(plotData.value[0]);
+      
+      // Add scatter plot for optimization points
+      plotData.value[1] = {
+        x: [],
+        y: [],
+        mode: 'markers',
+        type: 'scatter',
+        marker: { color: 'red', size: 5 }
+      };
+
+      // Create the plot
+      Plotly.newPlot(testerRef.value, plotData.value, layout, config);
+    };
+
+    // Update the plot when function changes
+    const changeFunction = (e) => {
+      const selectedFuncName = e.target.options[e.target.selectedIndex].getAttribute('funcname');
+      currentFunction.value = selectedFuncName;
+      
+      const funcData = functions[selectedFuncName];
+      
+      // Generate new contour data
+      const newContourData = generateContourData(
+        funcData.f,
+        funcData.xDomain,
+        funcData.yDomain,
+        funcData.logscale
+      );
+      addContourPlotOptions(newContourData);
+      
+      // Update the contour data in the plot
+      plotData.value[0] = newContourData;
+      
+      // Use Plotly.react for efficient update
+      Plotly.react(testerRef.value, plotData.value, layout, config);
+    };
+
+    // Mount the plot when component is ready
+    onMounted(() => {
+      initializePlot();
+    });
+
+    // Return reactive state and methods
+    return {
+      testerRef,
+      funcs: Object.keys(functions),
+      changeFunction,
+      generateContourData,
+      plotData,
+      currentFunction
+    };
   }
 });
 

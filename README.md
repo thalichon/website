@@ -1,16 +1,16 @@
 # Description
 Vite + Vue + VueRouter + PrimeVue
 
-# Install the dev environment
+# Install the development environment
 npm install
 
 # Config
-For virtualised / containerised environments:
+To expose the development server to other interfaces than loopback:
 - Ready to go.
 
-For host environments:
+To expose the development server only to loopback:
 - Edit the file "/vite.config.ts"
 - Remove the option "--host"
 
-# Run dev environment
+# Run the development server
 npm run dev
